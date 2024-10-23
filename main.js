@@ -367,17 +367,17 @@ class MemeTickerManager {
         const controls = document.createElement('div');
         controls.className = 'trading-controls';
         // Calculate buy amounts based on portfolio value
-        const portfolioValue = this.portfolio.cash + 
+        const portfolioValue = this.portfolio.cash +
             Array.from(this.portfolio.holdings.entries())
-                .reduce((sum, [sym, amount]) => {
-                    const ticker = this.tickers.get(sym);
-                    return sum + (ticker ? (ticker.price / 100) * amount : 0);
-                }, 0);
-        
-        const logBase = Math.ceil(Math.log10(Math.max(10, portfolioValue)));
+            .reduce((sum, [sym, amount]) => {
+                const ticker = this.tickers.get(sym);
+                return sum + (ticker ? (ticker.price / 100) * amount : 0);
+            }, 0);
+
+        const logBase = Math.ceil(Math.log10(portfolioValue));
         const smallBuy = Math.pow(10, logBase - 2);
         const largeBuy = Math.pow(10, logBase - 1);
-        
+
         controls.innerHTML = `
             <div class="buy-controls">
                 <button class="buy-btn" data-amount="${smallBuy}">Buy $${smallBuy}</button>
@@ -628,17 +628,17 @@ class MemeTickerManager {
                 const notification = document.querySelector('.balance-notification');
                 notification.textContent = 'Insufficient funds!';
                 notification.style.display = 'block';
-                
+
                 // Reset the animation
                 notification.style.animation = 'none';
                 notification.offsetHeight; // Trigger reflow
                 notification.style.animation = 'fadeOut 3s forwards';
-                
+
                 // Hide after animation
                 setTimeout(() => {
                     notification.style.display = 'none';
                 }, 3000);
-                
+
                 return;
             }
             this.portfolio.cash -= totalCost;
@@ -666,14 +666,14 @@ class MemeTickerManager {
 
         // Calculate total portfolio value
         let totalValue = this.portfolio.cash;
-        
+
         // Update hourly prices array
         this.portfolio.hourlyPrices.push(totalValue);
         this.portfolio.hourlyPrices.shift(); // Remove oldest price
-        
+
         // Calculate 24h change using average of last 24 timesteps
         const prevDayAvg = this.portfolio.hourlyPrices.reduce((a, b) => a + b, 0) / 24;
-        
+
         // Update holdings
         const holdingsContainer = document.querySelector('.holdings');
         holdingsContainer.innerHTML = '<h3>Your Memecoins</h3>';
@@ -685,9 +685,9 @@ class MemeTickerManager {
             // Calculate current and previous values
             const currentValue = (ticker.price / 100) * amount;
             const prevValue = (ticker.prevPrice / 100) * amount;
-            
+
             totalValue += currentValue;
-            
+
             // Add holding value to hourly tracking
             const holdingValue = currentValue;
             this.portfolio.hourlyPrices[23] += holdingValue; // Add to current hour
@@ -709,13 +709,13 @@ class MemeTickerManager {
         const totalValueElem = document.getElementById('total-value');
         const dailyChangeElem = document.getElementById('daily-change');
         const holdingsCountElem = document.getElementById('holdings-count');
-        
+
         const portfolioChange = ((totalValue - prevDayAvg) / prevDayAvg) * 100;
         const changeClass = portfolioChange >= 0 ? 'positive' : 'negative';
 
         totalValueElem.textContent = `$${totalValue.toFixed(2)}`;
         totalValueElem.className = `stat-value ${changeClass}`;
-        
+
         dailyChangeElem.textContent = `${portfolioChange >= 0 ? '+' : ''}${portfolioChange.toFixed(2)}%`;
         dailyChangeElem.className = `stat-value ${changeClass}`;
 
@@ -874,29 +874,29 @@ window.addEventListener('load', () => {
     tickerManager = new MemeTickerManager();
     initializeSystem();
     initializeExploreTab();
-    
+
     // Setup navigation
     document.querySelectorAll('.nav-item').forEach(item => {
         item.addEventListener('click', (e) => {
             e.preventDefault();
             const section = item.dataset.section;
-            
+
             // Update active state
             document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
             item.classList.add('active');
-            
+
             // Hide all sections
             document.querySelectorAll('.content-section').forEach(section => {
                 section.style.display = 'none';
             });
-            
+
             // Show selected section
             const selectedSection = document.getElementById(`${section}-section`);
             if (selectedSection) {
                 selectedSection.style.display = 'block';
-                
+
                 // Update header text
-                document.querySelector('.header').textContent = 
+                document.querySelector('.header').textContent =
                     section.charAt(0).toUpperCase() + section.slice(1);
             }
         });
@@ -942,11 +942,11 @@ function updateExploreResults(searchTerm, filter) {
     const allTickers = new Map([
         ...Array.from(tickerManager.tickers.entries()).map(([symbol, data]) => [
             symbol,
-            { ...data, status: 'active' }
+            {...data, status: 'active' }
         ]),
         ...Array.from(tickerManager.historicalTickers.entries()).map(([symbol, data]) => [
             symbol,
-            { ...data, status: 'delisted' }
+            {...data, status: 'delisted' }
         ])
     ]);
 
@@ -970,15 +970,15 @@ function updateExploreResults(searchTerm, filter) {
 function createExploreCard(symbol, data) {
     const card = document.createElement('div');
     card.className = 'explore-card';
-    
+
     const isActive = data.status === 'active';
     const price = isActive ? data.price : data.finalPrice;
     const history = isActive ? data.history : data.history;
-    
+
     // Calculate statistics
     const allTimeHigh = Math.max(...history);
     const allTimeLow = Math.min(...history);
-    const priceChange = isActive ? 
+    const priceChange = isActive ?
         ((price - data.prevPrice) / data.prevPrice * 100) :
         ((data.finalPrice - history[history.length - 2]) / history[history.length - 2] * 100);
 
