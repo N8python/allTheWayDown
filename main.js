@@ -5,14 +5,15 @@ let usernames;
 const generator = new TickerGenerator();
 let settings = {
     darkMode: false,
-    notifications: false
+    notifications: false,
+    notificationsExpected: 0
 };
 
 // Load settings from localStorage
 try {
     const savedSettings = localStorage.getItem('settings');
     if (savedSettings) {
-        settings = {...settings, ...JSON.parse(savedSettings)};
+        settings = {...settings, ...JSON.parse(savedSettings) };
     }
 } catch (e) {
     console.error('Error loading settings:', e);
@@ -889,10 +890,10 @@ window.addEventListener('load', () => {
     initializeSystem();
     initializeExploreTab();
     initializeSettings();
-    
+
     // Apply initial dark mode state
     applyDarkMode(settings.darkMode);
-    
+
     // Start notification system if enabled
     if (settings.notifications) {
         startNotificationSystem();
@@ -932,18 +933,18 @@ window.addEventListener('load', () => {
 function initializeSettings() {
     const darkModeToggle = document.getElementById('dark-mode');
     const notificationsToggle = document.getElementById('notifications');
-    
+
     // Set initial states
     darkModeToggle.checked = settings.darkMode;
     notificationsToggle.checked = settings.notifications;
-    
+
     // Add event listeners
     darkModeToggle.addEventListener('change', (e) => {
         settings.darkMode = e.target.checked;
         saveSettings();
         applyDarkMode(e.target.checked);
     });
-    
+
     notificationsToggle.addEventListener('change', (e) => {
         settings.notifications = e.target.checked;
         saveSettings();
@@ -970,44 +971,48 @@ function applyDarkMode(isDark) {
 }
 
 let notificationInterval;
+
 function startNotificationSystem() {
     if (notificationInterval) {
         clearInterval(notificationInterval);
     }
-    
+
     // Generate a notification every 30-60 seconds
     notificationInterval = setInterval(() => {
         if (!settings.notifications) {
             clearInterval(notificationInterval);
             return;
         }
-        
+
         // Request permission if needed
         if (Notification.permission !== "granted") {
             Notification.requestPermission();
             return;
         }
-        
+
+        settings.notificationsExpected++;
+
         // Generate a single tweet optimized for notifications
         modelWorker.postMessage({
             type: 'generate',
-            data: { 
+            data: {
                 count: 1,
                 isNotification: true
             }
         });
-    }, 30000 + Math.random() * 30000);
+    }, 5000 + Math.random() * 5000);
 }
 
 // Modify handleGeneratedTweets to show notifications
 const originalHandleGeneratedTweets = handleGeneratedTweets;
 handleGeneratedTweets = function(data) {
     originalHandleGeneratedTweets(data);
-    
+
     // If this was a notification generation and notifications are enabled
-    if (settings.notifications && data.texts.length === 1) {
+    if (settings.notifications && data.texts.length === 1 && settings.notificationsExpected > 0) {
+        settings.notificationsExpected--;
         const tweet = data.texts[0];
-        
+
         // Try web notification first
         if (Notification.permission === "granted") {
             new Notification("New Memecoin Activity! 🚀", {
@@ -1015,13 +1020,13 @@ handleGeneratedTweets = function(data) {
                 icon: "/favicon.ico"
             });
         }
-        
+
         // Also show in-app notification
         const notification = document.createElement('div');
         notification.className = 'in-app-notification';
         notification.textContent = tweet;
         document.body.appendChild(notification);
-        
+
         // Remove after animation
         setTimeout(() => {
             notification.style.opacity = '0';
