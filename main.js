@@ -176,12 +176,28 @@ function handleGeneratedTweets(data) {
         tweetDiv.style.backgroundColor = `hsl(${Math.random() * 360}, 40%, 97%)`;
         tweetDiv.style.borderLeft = `4px solid hsl(${Math.random() * 360}, 70%, 65%)`;
 
-        const username = usernames[Math.floor(Math.random() * usernames.length)];
+        const rawUsername = usernames[Math.floor(Math.random() * usernames.length)];
+        // Create display name by replacing underscores with spaces and capitalizing words
+        const displayName = rawUsername
+            .split(/[_\d]/)
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+            .join(' ')
+            .trim();
+        
+        // Create handle by removing special chars and sometimes capitalizing first letter
+        const handle = rawUsername
+            .toLowerCase()
+            .replace(/[^a-z]/g, '')
+            .trim();
+        const finalHandle = Math.random() < 0.3 ? 
+            handle.charAt(0).toUpperCase() + handle.slice(1) : 
+            handle;
+
         const usernameSpan = document.createElement('span');
         usernameSpan.className = 'username';
         // Add random verified badge to some users
         const isVerified = Math.random() < 0.3;
-        usernameSpan.innerHTML = `<strong>${username}</strong> ${isVerified ? '✓' : ''}<em>@${username}</em>`;
+        usernameSpan.innerHTML = `<strong>${displayName}</strong> ${isVerified ? '✓' : ''}<em>@${finalHandle}</em>`;
         usernameSpan.style.color = `rgb(128, 128, 128)`;
 
         // Add random emojis to tweet text
