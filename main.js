@@ -210,6 +210,10 @@ class MemeTickerManager {
         this.generator = new TickerGenerator();
         this.historyLength = 20;
         this.tickerCount = 10;
+        this.portfolio = {
+            cash: 100,
+            holdings: new Map()
+        };
         this.MODEL_PARAMS = {
             baseVolatility: 0.02,
             momentumDecay: 0.7,
@@ -307,12 +311,30 @@ class MemeTickerManager {
             <span class="ticker-price">${price.toFixed(4)}</span>
         `;
 
+        // Create trading controls
+        const controls = document.createElement('div');
+        controls.className = 'trading-controls';
+        controls.innerHTML = `
+            <input type="number" min="0" step="1" placeholder="Amount" class="trade-amount">
+            <button class="buy-btn">Buy</button>
+            <button class="sell-btn">Sell</button>
+        `;
+
+        // Add event listeners for trading
+        const buyBtn = controls.querySelector('.buy-btn');
+        const sellBtn = controls.querySelector('.sell-btn');
+        const amountInput = controls.querySelector('.trade-amount');
+
+        buyBtn.addEventListener('click', () => this.executeTrade(symbol, Number(amountInput.value), true));
+        sellBtn.addEventListener('click', () => this.executeTrade(symbol, Number(amountInput.value), false));
+
         // Create and set up the canvas
         const canvas = document.createElement('canvas');
         canvas.className = 'mini-chart';
 
         // Add elements to the ticker
         ticker.appendChild(header);
+        ticker.appendChild(controls);
         ticker.appendChild(canvas);
 
         // Add to container
@@ -502,6 +524,68 @@ class MemeTickerManager {
         console.log(`Replaced ${symbol} with ${newSymbol}`);
     }
 
+    executeTrade(symbol, amount, isBuy) {
+        if (!amount || amount <= 0) {
+            alert('Please enter a valid amount');
+            return;
+        }
+
+        const ticker = this.tickers.get(symbol);
+        if (!ticker) return;
+
+        const totalCost = ticker.price * amount;
+
+        if (isBuy) {
+            if (totalCost > this.portfolio.cash) {
+                alert('Insufficient funds!');
+                return;
+            }
+            this.portfolio.cash -= totalCost;
+            const currentHolding = this.portfolio.holdings.get(symbol) || 0;
+            this.portfolio.holdings.set(symbol, currentHolding + amount);
+        } else {
+            const currentHolding = this.portfolio.holdings.get(symbol) || 0;
+            if (amount > currentHolding) {
+                alert('Insufficient coins!');
+                return;
+            }
+            this.portfolio.cash += totalCost;
+            this.portfolio.holdings.set(symbol, currentHolding - amount);
+            if (currentHolding - amount === 0) {
+                this.portfolio.holdings.delete(symbol);
+            }
+        }
+
+        this.updatePortfolioDisplay();
+    }
+
+    updatePortfolioDisplay() {
+        // Update cash balance
+        document.querySelector('.balance-amount').textContent = `$${this.portfolio.cash.toFixed(2)}`;
+
+        // Update holdings
+        const holdingsContainer = document.querySelector('.holdings');
+        holdingsContainer.innerHTML = '<h3>Your Memecoins</h3>';
+
+        for (const [symbol, amount] of this.portfolio.holdings) {
+            const ticker = this.tickers.get(symbol);
+            if (!ticker) continue;
+
+            const value = ticker.price * amount;
+            const percentChange = ((ticker.price - ticker.prevPrice) / ticker.prevPrice) * 100;
+            const changeClass = percentChange >= 0 ? 'positive' : 'negative';
+
+            const holdingDiv = document.createElement('div');
+            holdingDiv.className = 'holding-item';
+            holdingDiv.innerHTML = `
+                <span class="coin-name">$${symbol}</span>
+                <span class="coin-amount">${amount.toFixed(0)}</span>
+                <span class="coin-value ${changeClass}">${percentChange >= 0 ? '+' : ''}${percentChange.toFixed(1)}%</span>
+            `;
+            holdingsContainer.appendChild(holdingDiv);
+        }
+    }
+
     updateTicker(symbol, forceUpdate = false) {
         const ticker = this.tickers.get(symbol);
         if (!ticker || this.checkForReplacement(symbol, ticker)) return;
@@ -526,6 +610,9 @@ class MemeTickerManager {
         const priceElement = ticker.element.querySelector('.ticker-price');
         const changeElement = ticker.element.querySelector('.ticker-change');
         const tickerElement = ticker.element.querySelector('.ticker-symbol');
+
+        // Update portfolio display after price changes
+        this.updatePortfolioDisplay();
 
         // Add regime indicator to ticker symbol
         const regimeIndicators = {

@@ -296,6 +296,43 @@
             fill: none;
             stroke-linejoin: round;
         }
+
+        .trading-controls {
+            display: flex;
+            gap: 0.5rem;
+            margin: 0.5rem 0;
+        }
+
+        .trade-amount {
+            background: #333;
+            border: 1px solid #444;
+            border-radius: 4px;
+            color: white;
+            padding: 0.25rem;
+            width: 100px;
+        }
+
+        .buy-btn, .sell-btn {
+            padding: 0.25rem 0.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .buy-btn {
+            background: #22c55e;
+            color: white;
+        }
+
+        .sell-btn {
+            background: #ef4444;
+            color: white;
+        }
+
+        .buy-btn:hover, .sell-btn:hover {
+            opacity: 0.9;
+        }
         
         .up-chart path {
             stroke: #00ff9d;
@@ -316,30 +353,15 @@
             <div class="portfolio-summary">
                 <h2>Portfolio</h2>
                 <div class="balance-card">
-                    <div class="balance-label">Total Balance</div>
-                    <div class="balance-amount">$10,420.69</div>
-                    <div class="balance-change positive">+2.4% today</div>
+                    <div class="balance-label">Available Cash</div>
+                    <div class="balance-amount">$100.00</div>
                 </div>
             </div>
 
             <!-- Holdings -->
             <div class="holdings">
                 <h3>Your Memecoins</h3>
-                <div class="holding-item">
-                    <span class="coin-name">$PEPE</span>
-                    <span class="coin-amount">1,337,420</span>
-                    <span class="coin-value positive">+5.2%</span>
-                </div>
-                <div class="holding-item">
-                    <span class="coin-name">$DOGE</span>
-                    <span class="coin-amount">42,069</span>
-                    <span class="coin-value negative">-1.8%</span>
-                </div>
-                <div class="holding-item">
-                    <span class="coin-name">$SHIB</span>
-                    <span class="coin-amount">6,942,000</span>
-                    <span class="coin-value positive">+3.4%</span>
-                </div>
+                <!-- Holdings will be populated dynamically -->
             </div>
 
             <!-- Navigation -->
