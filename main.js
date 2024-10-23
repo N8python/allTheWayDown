@@ -627,6 +627,10 @@ class MemeTickerManager {
         // Update cash balance
         document.querySelector('.balance-amount').textContent = `$${this.portfolio.cash.toFixed(2)}`;
 
+        // Calculate total portfolio value and 24h change
+        let totalValue = this.portfolio.cash;
+        let totalPrevValue = this.portfolio.cash;
+
         // Update holdings
         const holdingsContainer = document.querySelector('.holdings');
         holdingsContainer.innerHTML = '<h3>Your Memecoins</h3>';
@@ -635,7 +639,13 @@ class MemeTickerManager {
             const ticker = this.tickers.get(symbol);
             if (!ticker) continue;
 
-            const value = ticker.price * amount;
+            // Calculate current and previous values
+            const currentValue = (ticker.price / 100) * amount;
+            const prevValue = (ticker.prevPrice / 100) * amount;
+            
+            totalValue += currentValue;
+            totalPrevValue += prevValue;
+
             const percentChange = ((ticker.price - ticker.prevPrice) / ticker.prevPrice) * 100;
             const changeClass = percentChange >= 0 ? 'positive' : 'negative';
 
@@ -643,11 +653,27 @@ class MemeTickerManager {
             holdingDiv.className = 'holding-item';
             holdingDiv.innerHTML = `
                 <span class="coin-name">$${symbol}</span>
-                <span class="coin-amount">${amount.toFixed(0)}</span>
+                <span class="coin-amount">${amount.toFixed(0)} ($${currentValue.toFixed(2)})</span>
                 <span class="coin-value ${changeClass}">${percentChange >= 0 ? '+' : ''}${percentChange.toFixed(1)}%</span>
             `;
             holdingsContainer.appendChild(holdingDiv);
         }
+
+        // Update portfolio stats
+        const totalValueElem = document.getElementById('total-value');
+        const dailyChangeElem = document.getElementById('daily-change');
+        const holdingsCountElem = document.getElementById('holdings-count');
+        
+        const portfolioChange = ((totalValue - totalPrevValue) / totalPrevValue) * 100;
+        const changeClass = portfolioChange >= 0 ? 'positive' : 'negative';
+
+        totalValueElem.textContent = `$${totalValue.toFixed(2)}`;
+        totalValueElem.className = `stat-value ${changeClass}`;
+        
+        dailyChangeElem.textContent = `${portfolioChange >= 0 ? '+' : ''}${portfolioChange.toFixed(2)}%`;
+        dailyChangeElem.className = `stat-value ${changeClass}`;
+
+        holdingsCountElem.textContent = `${this.portfolio.holdings.size} coins`;
     }
 
     updateTicker(symbol, forceUpdate = false) {
