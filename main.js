@@ -1000,7 +1000,7 @@ function startNotificationSystem() {
                 isNotification: true
             }
         });
-    }, 5000 + Math.random() * 5000);
+    }, 15000 + Math.random() * 15000);
 }
 
 // Modify handleGeneratedTweets to show notifications
