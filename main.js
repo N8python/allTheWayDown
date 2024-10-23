@@ -211,7 +211,7 @@ class MemeTickerManager {
         this.historyLength = 20;
         this.tickerCount = 10;
         this.portfolio = {
-            cash: 100,
+            cash: 10000, // $100.00 in cents
             holdings: new Map()
         };
         this.MODEL_PARAMS = {
@@ -533,7 +533,7 @@ class MemeTickerManager {
         const ticker = this.tickers.get(symbol);
         if (!ticker) return;
 
-        const totalCost = ticker.price * amount;
+        const totalCost = (ticker.price * amount);
 
         if (isBuy) {
             if (totalCost > this.portfolio.cash) {
@@ -561,7 +561,7 @@ class MemeTickerManager {
 
     updatePortfolioDisplay() {
         // Update cash balance
-        document.querySelector('.balance-amount').textContent = `$${this.portfolio.cash.toFixed(2)}`;
+        document.querySelector('.balance-amount').textContent = `$${(this.portfolio.cash / 100).toFixed(2)}`;
 
         // Update holdings
         const holdingsContainer = document.querySelector('.holdings');
@@ -571,7 +571,7 @@ class MemeTickerManager {
             const ticker = this.tickers.get(symbol);
             if (!ticker) continue;
 
-            const value = ticker.price * amount;
+            const value = (ticker.price * amount);
             const percentChange = ((ticker.price - ticker.prevPrice) / ticker.prevPrice) * 100;
             const changeClass = percentChange >= 0 ? 'positive' : 'negative';
 
@@ -623,7 +623,7 @@ class MemeTickerManager {
         const indicator = ticker.state.isDeathSpiral ? '💀' : regimeIndicators[ticker.state.regime];
         tickerElement.textContent = `$${symbol}`;
 
-        priceElement.textContent = `($USD) ${(ticker.price / 100).toFixed(6)}`;
+        priceElement.textContent = `$${ticker.price.toFixed(2)}`;
         changeElement.textContent = `${percentChange >= 0 ? '▲' : '▼'} ${Math.abs(percentChange).toFixed(2)}%`;
 
         const changeClass = percentChange >= 0 ? 'price-up' : 'price-down';
