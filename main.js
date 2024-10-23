@@ -964,9 +964,9 @@ function saveSettings() {
 
 function applyDarkMode(isDark) {
     document.documentElement.style.filter = isDark ? 'invert(1) hue-rotate(180deg)' : 'none';
-    // Don't invert images, videos and the trending section
-    document.querySelectorAll('img, video, .trending').forEach(el => {
-        el.style.filter = isDark ? 'invert(1) hue-rotate(180deg)' : 'none';
+    // Don't invert images, videos, trending section and notifications
+    document.querySelectorAll('img, video, .trending, .in-app-notification').forEach(el => {
+        el.style.filter = 'none';
     });
 }
 
