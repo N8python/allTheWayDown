@@ -254,6 +254,8 @@ class MemeTickerManager {
         this.generator = new TickerGenerator();
         this.historyLength = 20;
         this.tickerCount = 10;
+        this.historicalTickers = new Map(); // Store delisted/replaced tickers
+        this.watchlist = new Set(); // Store watched tickers
         this.portfolio = {
             cash: 100,
             holdings: new Map(),
@@ -556,10 +558,18 @@ class MemeTickerManager {
     }
 
     replaceTicker(symbol) {
-        // Remove old ticker element from DOM
+        // Store the old ticker in historical data before removing
         const oldTicker = this.tickers.get(symbol);
-        if (oldTicker && oldTicker.element) {
-            oldTicker.element.remove();
+        if (oldTicker) {
+            this.historicalTickers.set(symbol, {
+                finalPrice: oldTicker.price,
+                history: oldTicker.history,
+                delistedAt: Date.now(),
+                state: oldTicker.state
+            });
+            if (oldTicker.element) {
+                oldTicker.element.remove();
+            }
         }
 
         // Generate new ticker
@@ -842,6 +852,7 @@ window.addEventListener('load', () => {
     tweetsContainer.addEventListener('scroll', handleScroll);
     tickerManager = new MemeTickerManager();
     initializeSystem();
+    initializeExploreTab();
     
     // Setup navigation
     document.querySelectorAll('.nav-item').forEach(item => {

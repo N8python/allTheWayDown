@@ -295,6 +295,87 @@
             margin: 0.5rem 0;
         }
 
+        /* Explore section styles */
+        .explore-filters {
+            display: flex;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            background: #f0f0f0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .explore-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .explore-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .watch-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+
+        .watch-btn:hover {
+            opacity: 1;
+        }
+
+        .watch-btn.watching {
+            opacity: 1;
+        }
+
+        .explore-card-price {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .explore-card-stats {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.9rem;
+            color: var(--text-gray);
+            margin-bottom: 0.5rem;
+        }
+
+        .delisted-badge {
+            background: #ff4444;
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        .explore-chart {
+            width: 100%;
+            height: 60px;
+            margin-top: 0.5rem;
+        }
+
         .nav-item.active {
             background: var(--background-light);
             font-weight: bold;
@@ -524,7 +605,13 @@
             <div id="explore-section" class="content-section" style="display: none;">
                 <h2>Explore Memecoins</h2>
                 <div class="search-box">
-                    <input type="text" placeholder="Search memecoins...">
+                    <input type="text" id="coin-search" placeholder="Search memecoins...">
+                </div>
+                <div class="explore-filters">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="active">Active</button>
+                    <button class="filter-btn" data-filter="delisted">Delisted</button>
+                    <button class="filter-btn" data-filter="watchlist">Watchlist</button>
                 </div>
                 <div id="explore-results"></div>
             </div>
