@@ -392,12 +392,11 @@ class MemeTickerManager {
         const logBase = Math.ceil(Math.log10(portfolioValue));
         const smallBuy = Math.pow(10, logBase - 2);
         const largeBuy = Math.pow(10, logBase - 1);
-
         controls.innerHTML = `
             <div class="buy-controls">
                 <button class="buy-btn" data-amount="${smallBuy}">Buy $${smallBuy}</button>
                 <button class="buy-btn" data-amount="${largeBuy}">Buy $${largeBuy}</button>
-                <button class="buy-btn" data-amount="100">Buy 100 coins</button>
+                <button class="buy-btn" data-amount="100" data-direct="true">Buy 100 coins</button>
             </div>
             <div class="sell-controls">
                 <button class="sell-btn" data-amount="all">Sell All</button>
@@ -409,7 +408,7 @@ class MemeTickerManager {
             btn.addEventListener('click', () => {
                 const amount = btn.dataset.amount;
                 // Check if amount is a dollar value (not coin amount)
-                if (!isNaN(amount) && amount !== '100') {
+                if (!isNaN(amount) && btn.dataset.direct === undefined) {
                     // For dollar amounts, calculate coins based on current price (convert price to dollars)
                     const priceInDollars = this.tickers.get(symbol).price / 100;
                     const coins = Math.floor(Number(amount) / priceInDollars);
@@ -966,7 +965,7 @@ function applyDarkMode(isDark) {
     document.documentElement.style.filter = isDark ? 'invert(1) hue-rotate(180deg)' : 'none';
     // Don't invert images, videos, trending section and notifications
     document.querySelectorAll('img, video, .trending, .in-app-notification').forEach(el => {
-        el.style.filter = 'none';
+        el.style.filter = 'invert(1) hue-rotate(180deg)';
     });
 }
 
@@ -1139,7 +1138,6 @@ function createExploreCard(symbol, data) {
 
     return card;
 }
-
 // Add to window for onclick access
 window.toggleWatchlist = function(symbol) {
     if (tickerManager.watchlist.has(symbol)) {
