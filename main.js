@@ -602,7 +602,20 @@ class MemeTickerManager {
 
         if (isBuy) {
             if (totalCost > this.portfolio.cash) {
-                alert('Insufficient funds!');
+                const notification = document.querySelector('.balance-notification');
+                notification.textContent = 'Insufficient funds!';
+                notification.style.display = 'block';
+                
+                // Reset the animation
+                notification.style.animation = 'none';
+                notification.offsetHeight; // Trigger reflow
+                notification.style.animation = 'fadeOut 3s forwards';
+                
+                // Hide after animation
+                setTimeout(() => {
+                    notification.style.display = 'none';
+                }, 3000);
+                
                 return;
             }
             this.portfolio.cash -= totalCost;

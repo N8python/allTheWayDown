@@ -107,6 +107,23 @@
             display: inline-block;
         }
 
+        .balance-notification {
+            font-size: 0.9rem;
+            padding: 0.5rem;
+            margin-top: 0.5rem;
+            border-radius: 8px;
+            background: rgba(239, 68, 68, 0.2);
+            color: #fff;
+            text-align: center;
+            animation: fadeOut 3s forwards;
+        }
+
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            70% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
         .holdings {
             padding: 1rem;
             margin-bottom: 1rem;
@@ -443,6 +460,7 @@
                 <div class="balance-card">
                     <div class="balance-label">Available Cash</div>
                     <div class="balance-amount">$100.00</div>
+                    <div class="balance-notification" style="display: none;"></div>
                 </div>
             </div>
 
