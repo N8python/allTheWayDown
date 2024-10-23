@@ -331,8 +331,9 @@ class MemeTickerManager {
             btn.addEventListener('click', () => {
                 const amount = btn.dataset.amount;
                 if (amount === '1' || amount === '10') {
-                    // For dollar amounts, calculate coins based on current price
-                    const coins = Math.floor((Number(amount) * 100) / ticker.price);
+                    // For dollar amounts, calculate coins based on current price (convert price to dollars)
+                    const priceInDollars = this.tickers.get(symbol).price / 100;
+                    const coins = Math.floor(Number(amount) / priceInDollars);
                     this.executeTrade(symbol, coins, true);
                 } else {
                     // For direct coin amounts
