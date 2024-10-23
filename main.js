@@ -714,10 +714,10 @@ class MemeTickerManager {
         const changeClass = portfolioChange >= 0 ? 'positive' : 'negative';
 
         totalValueElem.textContent = `$${totalValue.toFixed(2)}`;
-        totalValueElem.className = `stat-value ${changeClass}`;
+        totalValueElem.className = `stat-value ${portfolioChange === 0 ? '' : changeClass}`;
 
         dailyChangeElem.textContent = `${portfolioChange >= 0 ? '+' : ''}${portfolioChange.toFixed(2)}%`;
-        dailyChangeElem.className = `stat-value ${changeClass}`;
+        dailyChangeElem.className = `stat-value ${portfolioChange === 0 ? '' : changeClass}`;
 
         holdingsCountElem.textContent = `${this.portfolio.holdings.size} coins`;
     }
