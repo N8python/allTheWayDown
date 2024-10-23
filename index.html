@@ -527,6 +527,31 @@
         .down-chart path {
             stroke: #ff4d4d;
         }
+        
+        .in-app-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            max-width: 300px;
+            z-index: 1000;
+            animation: slideIn 0.5s ease-out;
+            transition: opacity 0.5s;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 

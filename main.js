@@ -962,24 +962,11 @@ function saveSettings() {
 }
 
 function applyDarkMode(isDark) {
-    const root = document.documentElement;
-    if (isDark) {
-        root.style.setProperty('--background-light', '#15202b');
-        root.style.setProperty('--text-dark', '#ffffff');
-        root.style.setProperty('--text-gray', '#8899a6');
-        root.style.setProperty('--border-color', '#38444d');
-        document.querySelectorAll('.sidebar, .main-content').forEach(el => {
-            el.style.background = '#192734';
-        });
-    } else {
-        root.style.setProperty('--background-light', '#f7f9f9');
-        root.style.setProperty('--text-dark', '#0f1419');
-        root.style.setProperty('--text-gray', '#536471');
-        root.style.setProperty('--border-color', '#ebeef0');
-        document.querySelectorAll('.sidebar, .main-content').forEach(el => {
-            el.style.background = 'white';
-        });
-    }
+    document.documentElement.style.filter = isDark ? 'invert(1) hue-rotate(180deg)' : 'none';
+    // Don't invert images and videos
+    document.querySelectorAll('img, video').forEach(el => {
+        el.style.filter = isDark ? 'invert(1) hue-rotate(180deg)' : 'none';
+    });
 }
 
 let notificationInterval;
@@ -1015,12 +1002,28 @@ handleGeneratedTweets = function(data) {
     originalHandleGeneratedTweets(data);
     
     // If this was a notification generation and notifications are enabled
-    if (settings.notifications && data.texts.length === 1 && Notification.permission === "granted") {
+    if (settings.notifications && data.texts.length === 1) {
         const tweet = data.texts[0];
-        new Notification("New Memecoin Activity! 🚀", {
-            body: tweet,
-            icon: "/favicon.ico"
-        });
+        
+        // Try web notification first
+        if (Notification.permission === "granted") {
+            new Notification("New Memecoin Activity! 🚀", {
+                body: tweet,
+                icon: "/favicon.ico"
+            });
+        }
+        
+        // Also show in-app notification
+        const notification = document.createElement('div');
+        notification.className = 'in-app-notification';
+        notification.textContent = tweet;
+        document.body.appendChild(notification);
+        
+        // Remove after animation
+        setTimeout(() => {
+            notification.style.opacity = '0';
+            setTimeout(() => notification.remove(), 500);
+        }, 5000);
     }
 };
 
