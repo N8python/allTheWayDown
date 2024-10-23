@@ -810,7 +810,6 @@ class MemeTickerManager {
                 ticker.element.controls.updateLargeAndSmallBuy();
                 this.updateTicker(symbol);
             }
-            this.portfolio.cash += 10;
             // Update explore page if it's visible
             const exploreSection = document.getElementById('explore-section');
             if (exploreSection && exploreSection.style.display === 'block') {
@@ -902,68 +901,6 @@ class MemeTickerManager {
 }
 let tickerManager;
 // Initialize everything when the page loads
-function wrapEmojis() {
-    // Regex to match emoji characters
-    const emojiRegex = /[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu;
-    
-    // Walk through all text nodes in the document
-    const walker = document.createTreeWalker(
-        document.body,
-        NodeFilter.SHOW_TEXT,
-        null,
-        false
-    );
-
-    const nodesToProcess = [];
-    let node;
-    while (node = walker.nextNode()) {
-        if (node.nodeValue.match(emojiRegex) && 
-            !node.parentElement.classList.contains('emoji-wrapper')) {
-            nodesToProcess.push(node);
-        }
-    }
-
-    // Process nodes to wrap emojis
-    nodesToProcess.forEach(node => {
-        const fragment = document.createDocumentFragment();
-        let lastIndex = 0;
-        
-        [...node.nodeValue.matchAll(emojiRegex)].forEach(match => {
-            // Add text before emoji
-            if (match.index > lastIndex) {
-                fragment.appendChild(
-                    document.createTextNode(
-                        node.nodeValue.slice(lastIndex, match.index)
-                    )
-                );
-            }
-            
-            // Wrap emoji in span
-            const span = document.createElement('span');
-            span.textContent = match[0];
-            span.className = 'emoji-wrapper';
-            span.style.filter = 'none';
-            fragment.appendChild(span);
-            
-            lastIndex = match.index + match[0].length;
-        });
-        
-        // Add remaining text
-        if (lastIndex < node.nodeValue.length) {
-            fragment.appendChild(
-                document.createTextNode(
-                    node.nodeValue.slice(lastIndex)
-                )
-            );
-        }
-        
-        node.parentNode.replaceChild(fragment, node);
-    });
-}
-
-// Run emoji wrapper every second
-setInterval(wrapEmojis, 1000);
-
 window.addEventListener('load', () => {
     const tweetsContainer = document.getElementById('tweets-container');
     tweetsContainer.style.height = `${window.innerHeight - 48 - 10}px`;
