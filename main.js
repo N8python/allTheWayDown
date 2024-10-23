@@ -700,7 +700,7 @@ class MemeTickerManager {
             holdingDiv.innerHTML = `
                 <span class="coin-name">$${symbol}</span>
                 <span class="coin-amount">${amount.toFixed(0)} ($${currentValue.toFixed(2)})</span>
-                <span class="coin-value ${percentChange === 0 ? '' : changeClass}">${percentChange >= 0 ? '+' : ''}${percentChange.toFixed(1)}%</span>
+                <span class="coin-value ${Math.abs(percentChange) < 1e-3 ? '' : changeClass}">${percentChange >= 0 ? '+' : ''}${percentChange.toFixed(1)}%</span>
             `;
             holdingsContainer.appendChild(holdingDiv);
         }
@@ -714,10 +714,10 @@ class MemeTickerManager {
         const changeClass = portfolioChange >= 0 ? 'positive' : 'negative';
 
         totalValueElem.textContent = `$${totalValue.toFixed(2)}`;
-        totalValueElem.className = `stat-value ${portfolioChange === 0 ? '' : changeClass}`;
+        totalValueElem.className = `stat-value ${Math.abs(portfolioChange) < 1e-3 ? '' : changeClass}`;
 
         dailyChangeElem.textContent = `${portfolioChange >= 0 ? '+' : ''}${portfolioChange.toFixed(2)}%`;
-        dailyChangeElem.className = `stat-value ${portfolioChange === 0 ? '' : changeClass}`;
+        dailyChangeElem.className = `stat-value ${Math.abs(portfolioChange) < 1e-3 ? '' : changeClass}`;
 
         holdingsCountElem.textContent = `${this.portfolio.holdings.size} coins`;
     }
