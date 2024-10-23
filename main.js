@@ -205,12 +205,13 @@ function handleGeneratedTweets(data) {
         textDiv.className = 'text';
         textDiv.textContent = tweetText;
 
-        // Add interaction metrics
+        // Add interaction metrics using log-normal distribution
         const interactionsDiv = document.createElement('div');
         interactionsDiv.className = 'tweet-interactions';
-        const likes = Math.floor(Math.random() * 1000);
-        const reposts = Math.floor(Math.random() * 200);
-        const comments = Math.floor(Math.random() * 50);
+        const baseLog = Math.random() * 7; // log base for engagement (e^7 ≈ 1096)
+        const likes = Math.floor(Math.exp(baseLog));
+        const reposts = Math.floor(likes * (0.1 + Math.random() * 0.2)); // 10-30% of likes
+        const comments = Math.floor(reposts * (0.2 + Math.random() * 0.3)); // 20-50% of reposts
         interactionsDiv.innerHTML = `
             <span>🗣 ${comments}</span>
             <span>🔄 ${reposts}</span>
