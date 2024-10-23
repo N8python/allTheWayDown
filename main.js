@@ -543,11 +543,6 @@ class MemeTickerManager {
     }
 
     executeTrade(symbol, amount, isBuy) {
-        if (!amount || amount <= 0) {
-            alert('Please enter a valid amount');
-            return;
-        }
-
         const ticker = this.tickers.get(symbol);
         if (!ticker) return;
 
