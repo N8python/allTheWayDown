@@ -789,7 +789,36 @@ window.addEventListener('load', () => {
     tweetsContainer.addEventListener('scroll', handleScroll);
     tickerManager = new MemeTickerManager();
     initializeSystem();
+    
+    // Setup navigation
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            const section = item.dataset.section;
+            
+            // Update active state
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+            item.classList.add('active');
+            
+            // Hide all sections
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.style.display = 'none';
+            });
+            
+            // Show selected section
+            const selectedSection = document.getElementById(`${section}-section`);
+            if (selectedSection) {
+                selectedSection.style.display = 'block';
+                
+                // Update header text
+                document.querySelector('.header').textContent = 
+                    section.charAt(0).toUpperCase() + section.slice(1);
+            }
+        });
+    });
 
+    // Set Trade as active by default
+    document.querySelector('[data-section="trade"]').classList.add('active');
 });
 
 // Clean up worker on page unload
