@@ -763,6 +763,14 @@ class MemeTickerManager {
             for (const [symbol, ticker] of this.tickers) {
                 this.updateTicker(symbol);
             }
+            // Update explore page if it's visible
+            const exploreSection = document.getElementById('explore-section');
+            if (exploreSection && exploreSection.style.display === 'block') {
+                updateExploreResults(
+                    document.getElementById('coin-search').value.toLowerCase(),
+                    getCurrentFilter()
+                );
+            }
         }, 333);
     }
 
