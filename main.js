@@ -280,7 +280,7 @@ class MemeTickerManager {
 
         for (let i = 0; i < this.tickerCount; i++) {
             const ticker = this.generator.generateTicker(3, 4).toUpperCase();
-            const initialPrice = Math.random() * 100 + 0.01;
+            const initialPrice = Math.floor((Math.random() * 10000) + 1); // 0.01 to 100.00 in cents
             const history = this.generateHistoricalPrices(initialPrice, this.historyLength);
             const tickerState = this.initializeTickerState();
             tickerState.ticker = ticker;
@@ -533,7 +533,7 @@ class MemeTickerManager {
         const ticker = this.tickers.get(symbol);
         if (!ticker) return;
 
-        const totalCost = (ticker.price * amount);
+        const totalCost = Math.floor(ticker.price * amount);
 
         if (isBuy) {
             if (totalCost > this.portfolio.cash) {
@@ -571,7 +571,7 @@ class MemeTickerManager {
             const ticker = this.tickers.get(symbol);
             if (!ticker) continue;
 
-            const value = (ticker.price * amount);
+            const value = Math.floor(ticker.price * amount);
             const percentChange = ((ticker.price - ticker.prevPrice) / ticker.prevPrice) * 100;
             const changeClass = percentChange >= 0 ? 'positive' : 'negative';
 
@@ -579,7 +579,7 @@ class MemeTickerManager {
             holdingDiv.className = 'holding-item';
             holdingDiv.innerHTML = `
                 <span class="coin-name">$${symbol}</span>
-                <span class="coin-amount">${amount.toFixed(0)}</span>
+                <span class="coin-amount">${amount}</span>
                 <span class="coin-value ${changeClass}">${percentChange >= 0 ? '+' : ''}${percentChange.toFixed(1)}%</span>
             `;
             holdingsContainer.appendChild(holdingDiv);
@@ -623,7 +623,7 @@ class MemeTickerManager {
         const indicator = ticker.state.isDeathSpiral ? '💀' : regimeIndicators[ticker.state.regime];
         tickerElement.textContent = `$${symbol}`;
 
-        priceElement.textContent = `$${ticker.price.toFixed(2)}`;
+        priceElement.textContent = `$${(ticker.price / 100).toFixed(2)}`;
         changeElement.textContent = `${percentChange >= 0 ? '▲' : '▼'} ${Math.abs(percentChange).toFixed(2)}%`;
 
         const changeClass = percentChange >= 0 ? 'price-up' : 'price-down';
@@ -711,8 +711,8 @@ class MemeTickerManager {
             currentPrice *= (1 + momentum);
 
             // Ensure price stays positive and somewhat reasonable
-            currentPrice = Math.max(currentPrice, initialPrice * 0.5);
-            currentPrice = Math.min(currentPrice, initialPrice * 2);
+            currentPrice = Math.max(Math.floor(currentPrice), Math.floor(initialPrice * 0.5));
+            currentPrice = Math.min(Math.floor(currentPrice), Math.floor(initialPrice * 2));
 
             history.push(currentPrice);
         }
