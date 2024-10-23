@@ -546,7 +546,9 @@ class MemeTickerManager {
         const ticker = this.tickers.get(symbol);
         if (!ticker) return;
 
-        const totalCost = ticker.price * amount / 100;
+        // Convert price from cents to dollars for the transaction
+        const priceInDollars = ticker.price / 100;
+        const totalCost = priceInDollars * amount;
 
         if (isBuy) {
             if (totalCost > this.portfolio.cash) {
