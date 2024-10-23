@@ -183,15 +183,10 @@ function handleGeneratedTweets(data) {
             .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
             .join(' ')
             .trim();
-        
+
         // Create handle by removing special chars and sometimes capitalizing first letter
-        const handle = rawUsername
-            .toLowerCase()
-            .replace(/[^a-z]/g, '')
-            .trim();
-        const finalHandle = Math.random() < 0.3 ? 
-            handle.charAt(0).toUpperCase() + handle.slice(1) : 
-            handle;
+        const handle = rawUsername;
+        const finalHandle = handle;
 
         const usernameSpan = document.createElement('span');
         usernameSpan.className = 'username';
