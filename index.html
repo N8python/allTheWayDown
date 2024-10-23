@@ -241,6 +241,20 @@
             text-align: center;
         }
 
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-top: 0.5rem;
+        }
+
+        .stat-value.positive {
+            color: #22c55e;
+        }
+
+        .stat-value.negative {
+            color: #ef4444;
+        }
+
         .search-box {
             margin: 1rem 0;
         }
@@ -475,11 +489,15 @@
                 <div class="portfolio-stats">
                     <div class="stat-card">
                         <h3>Total Value</h3>
-                        <div id="total-value">Calculating...</div>
+                        <div id="total-value" class="stat-value">Calculating...</div>
                     </div>
                     <div class="stat-card">
                         <h3>24h Change</h3>
-                        <div id="daily-change">Calculating...</div>
+                        <div id="daily-change" class="stat-value">Calculating...</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Holdings</h3>
+                        <div id="holdings-count" class="stat-value">0 coins</div>
                     </div>
                 </div>
             </div>

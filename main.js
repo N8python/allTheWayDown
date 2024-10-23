@@ -256,7 +256,11 @@ class MemeTickerManager {
         this.tickerCount = 10;
         this.portfolio = {
             cash: 100,
-            holdings: new Map()
+            holdings: new Map(),
+            history: [{
+                timestamp: Date.now(),
+                value: 100
+            }]
         };
         // Note that ticker prices are internally stored in *cents* for precision reasons - as otherwise floating point errors can accumulate. when transacting, CONVERT
         this.MODEL_PARAMS = {
