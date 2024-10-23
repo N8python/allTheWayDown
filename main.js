@@ -172,20 +172,52 @@ function handleGeneratedTweets(data) {
         // Create and append tweet element
         const tweetDiv = document.createElement('div');
         tweetDiv.className = 'tweet';
-        tweetDiv.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 90%)`;
-        tweetDiv.style.borderLeft = `4px solid hsl(${Math.random() * 360}, 100%, 50%)`;
+        // More subtle pastel background colors
+        tweetDiv.style.backgroundColor = `hsl(${Math.random() * 360}, 40%, 97%)`;
+        tweetDiv.style.borderLeft = `4px solid hsl(${Math.random() * 360}, 70%, 65%)`;
 
         const username = usernames[Math.floor(Math.random() * usernames.length)];
         const usernameSpan = document.createElement('span');
         usernameSpan.className = 'username';
-        usernameSpan.innerHTML = "<em>@" + username + "</em>";
+        // Add random verified badge to some users
+        const isVerified = Math.random() < 0.3;
+        usernameSpan.innerHTML = `<strong>${username}</strong> ${isVerified ? '✓' : ''}<em>@${username}</em>`;
         usernameSpan.style.color = `rgb(128, 128, 128)`;
+
+        // Add random emojis to tweet text
+        const emojis = ['🚀', '💎', '🌙', '🔥', '💫', '✨', '🎯', '🎮', '🌈', '🎨', '🎪', '🎭', '🎪'];
+        const numEmojis = Math.floor(Math.random() * 3);
+        let tweetText = processedTweet;
+        for (let i = 0; i < numEmojis; i++) {
+            const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+            tweetText = emoji + ' ' + tweetText;
+        }
+
+        // Add random hashtags
+        const hashtags = ['#tothemoon', '#bullish', '#memecoin', '#crypto', '#wagmi', '#nfa', '#dyor'];
+        const numHashtags = Math.floor(Math.random() * 2);
+        for (let i = 0; i < numHashtags; i++) {
+            const hashtag = hashtags[Math.floor(Math.random() * hashtags.length)];
+            tweetText += ' ' + hashtag;
+        }
 
         const textDiv = document.createElement('div');
         textDiv.className = 'text';
-        textDiv.textContent = processedTweet;
+        textDiv.textContent = tweetText;
 
-        tweetDiv.append(usernameSpan, textDiv);
+        // Add interaction metrics
+        const interactionsDiv = document.createElement('div');
+        interactionsDiv.className = 'tweet-interactions';
+        const likes = Math.floor(Math.random() * 1000);
+        const reposts = Math.floor(Math.random() * 200);
+        const comments = Math.floor(Math.random() * 50);
+        interactionsDiv.innerHTML = `
+            <span>🗣 ${comments}</span>
+            <span>🔄 ${reposts}</span>
+            <span>❤️ ${likes}</span>
+        `;
+
+        tweetDiv.append(usernameSpan, textDiv, interactionsDiv);
         tweetDiv.animate([{ opacity: 0 }, { opacity: 1 }], {
             duration: 500,
             easing: 'ease-in'
