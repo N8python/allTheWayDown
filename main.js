@@ -316,18 +316,35 @@ class MemeTickerManager {
         const controls = document.createElement('div');
         controls.className = 'trading-controls';
         controls.innerHTML = `
-            <input type="number" min="0" step="1" placeholder="Amount" class="trade-amount">
-            <button class="buy-btn">Buy</button>
-            <button class="sell-btn">Sell</button>
+            <div class="buy-controls">
+                <button class="buy-btn" data-amount="1">Buy $1</button>
+                <button class="buy-btn" data-amount="10">Buy $10</button>
+                <button class="buy-btn" data-amount="100">Buy 100 coins</button>
+            </div>
+            <div class="sell-controls">
+                <button class="sell-btn" data-amount="all">Sell All</button>
+            </div>
         `;
 
         // Add event listeners for trading
-        const buyBtn = controls.querySelector('.buy-btn');
-        const sellBtn = controls.querySelector('.sell-btn');
-        const amountInput = controls.querySelector('.trade-amount');
+        controls.querySelectorAll('.buy-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const amount = btn.dataset.amount;
+                if (amount === '1' || amount === '10') {
+                    // For dollar amounts, calculate coins based on current price
+                    const coins = Math.floor((Number(amount) * 100) / ticker.price);
+                    this.executeTrade(symbol, coins, true);
+                } else {
+                    // For direct coin amounts
+                    this.executeTrade(symbol, Number(amount), true);
+                }
+            });
+        });
 
-        buyBtn.addEventListener('click', () => this.executeTrade(symbol, Number(amountInput.value), true));
-        sellBtn.addEventListener('click', () => this.executeTrade(symbol, Number(amountInput.value), false));
+        controls.querySelector('.sell-btn').addEventListener('click', () => {
+            const currentHolding = this.portfolio.holdings.get(symbol) || 0;
+            this.executeTrade(symbol, currentHolding, false);
+        });
 
         // Create and set up the canvas
         const canvas = document.createElement('canvas');
