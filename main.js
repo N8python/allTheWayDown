@@ -662,7 +662,7 @@ class MemeTickerManager {
 
     updatePortfolioDisplay() {
         // Update cash balance
-        document.querySelector('.balance-amount').textContent = `$${this.portfolio.cash.toFixed(2)}`;
+        document.querySelector('.balance-amount').textContent = `$${this.portfolio.cash.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
 
         // Calculate total portfolio value
         let totalValue = this.portfolio.cash;
