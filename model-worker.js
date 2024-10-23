@@ -23,17 +23,17 @@ async function initializeModel() {
     self.postMessage({ type: 'initialized' });
 }
 
-async function generateText(count) {
+async function generateText(count, isNotification = false) {
     const input = tokenizer(Array(count).fill("<|bos|>"));
     const time = performance.now();
 
     const outputs = await model.generate({
         ...input,
-        max_length: 128,
+        max_length: isNotification ? 64 : 128, // Shorter for notifications
         do_sample: true,
-        temperature: 1.0,
-        top_p: 0.9,
-        repetition_penalty: 1.15
+        temperature: isNotification ? 0.8 : 1.0, // Less random for notifications
+        top_p: isNotification ? 0.95 : 0.9,
+        repetition_penalty: isNotification ? 1.2 : 1.15 // Slightly higher for notifications
     });
 
     const endTime = performance.now();
@@ -57,10 +57,13 @@ self.onmessage = async function(e) {
 
         case 'generate':
             try {
-                const result = await generateText(data.count);
+                const result = await generateText(data.count, data.isNotification);
                 self.postMessage({
                     type: 'generation-complete',
-                    data: result
+                    data: {
+                        ...result,
+                        isNotification: data.isNotification
+                    }
                 });
             } catch (error) {
                 self.postMessage({

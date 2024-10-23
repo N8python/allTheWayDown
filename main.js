@@ -988,10 +988,13 @@ function startNotificationSystem() {
             return;
         }
         
-        // Generate a single tweet
+        // Generate a single tweet optimized for notifications
         modelWorker.postMessage({
             type: 'generate',
-            data: { count: 1 }
+            data: { 
+                count: 1,
+                isNotification: true
+            }
         });
     }, 30000 + Math.random() * 30000);
 }
