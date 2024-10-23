@@ -885,6 +885,124 @@ window.addEventListener('load', () => {
     document.querySelector('[data-section="trade"]').classList.add('active');
 });
 
+function initializeExploreTab() {
+    const searchInput = document.getElementById('coin-search');
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const resultsContainer = document.getElementById('explore-results');
+
+    // Add search functionality
+    searchInput.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        updateExploreResults(searchTerm, getCurrentFilter());
+    });
+
+    // Add filter functionality
+    filterButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            filterButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            updateExploreResults(searchInput.value.toLowerCase(), btn.dataset.filter);
+        });
+    });
+
+    // Initial results
+    updateExploreResults('', 'all');
+}
+
+function getCurrentFilter() {
+    return document.querySelector('.filter-btn.active').dataset.filter;
+}
+
+function updateExploreResults(searchTerm, filter) {
+    const resultsContainer = document.getElementById('explore-results');
+    resultsContainer.innerHTML = '';
+
+    // Combine active and historical tickers
+    const allTickers = new Map([
+        ...Array.from(tickerManager.tickers.entries()).map(([symbol, data]) => [
+            symbol,
+            { ...data, status: 'active' }
+        ]),
+        ...Array.from(tickerManager.historicalTickers.entries()).map(([symbol, data]) => [
+            symbol,
+            { ...data, status: 'delisted' }
+        ])
+    ]);
+
+    // Filter based on search term and filter type
+    const filteredTickers = Array.from(allTickers.entries()).filter(([symbol, data]) => {
+        const matchesSearch = symbol.toLowerCase().includes(searchTerm);
+        const matchesFilter = filter === 'all' ||
+            (filter === 'active' && data.status === 'active') ||
+            (filter === 'delisted' && data.status === 'delisted') ||
+            (filter === 'watchlist' && tickerManager.watchlist.has(symbol));
+        return matchesSearch && matchesFilter;
+    });
+
+    // Create and append result cards
+    filteredTickers.forEach(([symbol, data]) => {
+        const card = createExploreCard(symbol, data);
+        resultsContainer.appendChild(card);
+    });
+}
+
+function createExploreCard(symbol, data) {
+    const card = document.createElement('div');
+    card.className = 'explore-card';
+    
+    const isActive = data.status === 'active';
+    const price = isActive ? data.price : data.finalPrice;
+    const history = isActive ? data.history : data.history;
+    
+    // Calculate statistics
+    const allTimeHigh = Math.max(...history);
+    const allTimeLow = Math.min(...history);
+    const priceChange = isActive ? 
+        ((price - data.prevPrice) / data.prevPrice * 100) :
+        ((data.finalPrice - history[history.length - 2]) / history[history.length - 2] * 100);
+
+    card.innerHTML = `
+        <div class="explore-card-header">
+            <h3>${symbol}</h3>
+            <button class="watch-btn ${tickerManager.watchlist.has(symbol) ? 'watching' : ''}"
+                onclick="toggleWatchlist('${symbol}')">
+                ${tickerManager.watchlist.has(symbol) ? '👀' : '👁️'}
+            </button>
+        </div>
+        <div class="explore-card-price">
+            $${(price / 100).toFixed(6)}
+            <span class="price-change ${priceChange >= 0 ? 'positive' : 'negative'}">
+                ${priceChange >= 0 ? '▲' : '▼'} ${Math.abs(priceChange).toFixed(2)}%
+            </span>
+        </div>
+        <div class="explore-card-stats">
+            <div>ATH: $${(allTimeHigh / 100).toFixed(6)}</div>
+            <div>ATL: $${(allTimeLow / 100).toFixed(6)}</div>
+            ${isActive ? '' : `<div class="delisted-badge">Delisted</div>`}
+        </div>
+        <canvas class="explore-chart"></canvas>
+    `;
+
+    // Draw chart
+    const canvas = card.querySelector('.explore-chart');
+    tickerManager.drawChart(canvas, history, priceChange >= 0);
+
+    return card;
+}
+
+// Add to window for onclick access
+window.toggleWatchlist = function(symbol) {
+    if (tickerManager.watchlist.has(symbol)) {
+        tickerManager.watchlist.delete(symbol);
+    } else {
+        tickerManager.watchlist.add(symbol);
+    }
+    updateExploreResults(
+        document.getElementById('coin-search').value.toLowerCase(),
+        getCurrentFilter()
+    );
+};
+
 // Clean up worker on page unload
 window.addEventListener('beforeunload', () => {
     if (modelWorker) {
