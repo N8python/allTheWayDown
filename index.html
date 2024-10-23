@@ -67,6 +67,87 @@
         .nav-item:hover {
             background: var(--background-light);
         }
+
+        /* Portfolio Styles */
+        .portfolio-summary {
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .portfolio-summary h2 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+        }
+
+        .balance-card {
+            background: linear-gradient(135deg, #1da1f2, #1a91da);
+            padding: 1rem;
+            border-radius: 12px;
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .balance-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .balance-amount {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin: 0.5rem 0;
+        }
+
+        .balance-change {
+            font-size: 0.9rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.2);
+            display: inline-block;
+        }
+
+        .holdings {
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .holdings h3 {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+        }
+
+        .holding-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .coin-name {
+            font-weight: bold;
+            color: var(--text-dark);
+        }
+
+        .coin-amount {
+            color: var(--text-gray);
+            font-size: 0.9rem;
+        }
+
+        .coin-value {
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .positive {
+            color: #22c55e;
+        }
+
+        .negative {
+            color: #ef4444;
+        }
         
         .main-content {
             border-right: 1px solid var(--border-color);
@@ -230,26 +311,54 @@
     <div class="container">
         <aside class="sidebar">
             <div class="logo">🐢</div>
+            
+            <!-- Portfolio Summary -->
+            <div class="portfolio-summary">
+                <h2>Portfolio</h2>
+                <div class="balance-card">
+                    <div class="balance-label">Total Balance</div>
+                    <div class="balance-amount">$10,420.69</div>
+                    <div class="balance-change positive">+2.4% today</div>
+                </div>
+            </div>
+
+            <!-- Holdings -->
+            <div class="holdings">
+                <h3>Your Memecoins</h3>
+                <div class="holding-item">
+                    <span class="coin-name">$PEPE</span>
+                    <span class="coin-amount">1,337,420</span>
+                    <span class="coin-value positive">+5.2%</span>
+                </div>
+                <div class="holding-item">
+                    <span class="coin-name">$DOGE</span>
+                    <span class="coin-amount">42,069</span>
+                    <span class="coin-value negative">-1.8%</span>
+                </div>
+                <div class="holding-item">
+                    <span class="coin-name">$SHIB</span>
+                    <span class="coin-amount">6,942,000</span>
+                    <span class="coin-value positive">+3.4%</span>
+                </div>
+            </div>
+
+            <!-- Navigation -->
             <nav>
                 <a href="#" class="nav-item">
-                    <span>🏠</span>
-                    <span class="nav-text">&nbsp; Home</span>
+                    <span>📈</span>
+                    <span class="nav-text">&nbsp; Trade</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <span>💰</span>
+                    <span class="nav-text">&nbsp; Portfolio</span>
                 </a>
                 <a href="#" class="nav-item">
                     <span>🔍</span>
                     <span class="nav-text">&nbsp; Explore</span>
                 </a>
                 <a href="#" class="nav-item">
-                    <span>🔔</span>
-                    <span class="nav-text">&nbsp; Notifications</span>
-                </a>
-                <a href="#" class="nav-item">
-                    <span>✉️</span>
-                    <span class="nav-text">&nbsp; Messages</span>
-                </a>
-                <a href="#" class="nav-item">
-                    <span>👤</span>
-                    <span class="nav-text">&nbsp; Profile</span>
+                    <span>⚙️</span>
+                    <span class="nav-text">&nbsp; Settings</span>
                 </a>
             </nav>
         </aside>
