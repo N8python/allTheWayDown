@@ -363,6 +363,21 @@ class MemeTickerManager {
 
         this.startUpdates();
     }
+    calculateBuyAmounts() {
+        const portfolioValue = this.portfolio.cash +
+            Array.from(this.portfolio.holdings.entries())
+            .reduce((sum, [sym, amount]) => {
+                const ticker = this.tickers.get(sym);
+                return sum + (ticker ? (ticker.price / 100) * amount : 0);
+            }, 0);
+
+        const logBase = Math.ceil(Math.log10(portfolioValue));
+        return {
+            smallBuy: Math.pow(10, logBase - 2),
+            largeBuy: Math.pow(10, logBase - 1)
+        };
+    }
+
     createTickerElement(symbol, price, history) {
         const ticker = document.createElement('div');
         ticker.className = 'ticker';
@@ -381,17 +396,7 @@ class MemeTickerManager {
         // Create trading controls
         const controls = document.createElement('div');
         controls.className = 'trading-controls';
-        // Calculate buy amounts based on portfolio value
-        const portfolioValue = this.portfolio.cash +
-            Array.from(this.portfolio.holdings.entries())
-            .reduce((sum, [sym, amount]) => {
-                const ticker = this.tickers.get(sym);
-                return sum + (ticker ? (ticker.price / 100) * amount : 0);
-            }, 0);
-
-        const logBase = Math.ceil(Math.log10(portfolioValue));
-        const smallBuy = Math.pow(10, logBase - 2);
-        const largeBuy = Math.pow(10, logBase - 1);
+        const { smallBuy, largeBuy } = this.calculateBuyAmounts();
         controls.innerHTML = `
             <div class="buy-controls">
                 <button class="buy-btn" data-amount="${smallBuy}">Buy $${smallBuy}</button>
@@ -787,6 +792,19 @@ class MemeTickerManager {
 
     startUpdates() {
         setInterval(() => {
+            // Calculate new buy amounts
+            const { smallBuy, largeBuy } = this.calculateBuyAmounts();
+            
+            // Update all buy buttons with new amounts
+            document.querySelectorAll('.buy-btn[data-amount]').forEach(btn => {
+                if (btn.dataset.direct === undefined) {
+                    const isSmall = btn.textContent.includes(btn.dataset.amount);
+                    const newAmount = isSmall ? smallBuy : largeBuy;
+                    btn.dataset.amount = newAmount;
+                    btn.textContent = `Buy $${newAmount}`;
+                }
+            });
+
             for (const [symbol, ticker] of this.tickers) {
                 this.updateTicker(symbol);
             }
