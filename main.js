@@ -700,7 +700,7 @@ class MemeTickerManager {
             holdingDiv.innerHTML = `
                 <span class="coin-name">$${symbol}</span>
                 <span class="coin-amount">${amount.toFixed(0)} ($${currentValue.toFixed(2)})</span>
-                <span class="coin-value ${changeClass}">${percentChange >= 0 ? '+' : ''}${percentChange.toFixed(1)}%</span>
+                <span class="coin-value ${percentChange === 0 ? '' : changeClass}">${percentChange >= 0 ? '+' : ''}${percentChange.toFixed(1)}%</span>
             `;
             holdingsContainer.appendChild(holdingDiv);
         }
