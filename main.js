@@ -194,10 +194,10 @@ function handleGeneratedTweets(data) {
         }
 
         // Add random hashtags
-        const hashtags = ['#tothemoon', '#bullish', '#memecoin', '#crypto', '#wagmi', '#nfa', '#dyor'];
+        const tweetHashtags = ['#tothemoon', '#bullish', '#memecoin', '#crypto', '#wagmi', '#nfa', '#dyor'];
         const numHashtags = Math.floor(Math.random() * 2);
         for (let i = 0; i < numHashtags; i++) {
-            const hashtag = hashtags[Math.floor(Math.random() * hashtags.length)];
+            const hashtag = tweetHashtags[Math.floor(Math.random() * tweetHashtags.length)];
             tweetText += ' ' + hashtag;
         }
 
