@@ -260,7 +260,8 @@ class MemeTickerManager {
             history: [{
                 timestamp: Date.now(),
                 value: 100
-            }]
+            }],
+            hourlyPrices: new Array(24).fill(100) // Track last 24 hours of prices
         };
         // Note that ticker prices are internally stored in *cents* for precision reasons - as otherwise floating point errors can accumulate. when transacting, CONVERT
         this.MODEL_PARAMS = {
@@ -627,10 +628,16 @@ class MemeTickerManager {
         // Update cash balance
         document.querySelector('.balance-amount').textContent = `$${this.portfolio.cash.toFixed(2)}`;
 
-        // Calculate total portfolio value and 24h change
+        // Calculate total portfolio value
         let totalValue = this.portfolio.cash;
-        let totalPrevValue = this.portfolio.cash;
-
+        
+        // Update hourly prices array
+        this.portfolio.hourlyPrices.push(totalValue);
+        this.portfolio.hourlyPrices.shift(); // Remove oldest price
+        
+        // Calculate 24h change using average of last 24 timesteps
+        const prevDayAvg = this.portfolio.hourlyPrices.reduce((a, b) => a + b, 0) / 24;
+        
         // Update holdings
         const holdingsContainer = document.querySelector('.holdings');
         holdingsContainer.innerHTML = '<h3>Your Memecoins</h3>';
@@ -644,7 +651,10 @@ class MemeTickerManager {
             const prevValue = (ticker.prevPrice / 100) * amount;
             
             totalValue += currentValue;
-            totalPrevValue += prevValue;
+            
+            // Add holding value to hourly tracking
+            const holdingValue = currentValue;
+            this.portfolio.hourlyPrices[23] += holdingValue; // Add to current hour
 
             const percentChange = ((ticker.price - ticker.prevPrice) / ticker.prevPrice) * 100;
             const changeClass = percentChange >= 0 ? 'positive' : 'negative';
@@ -664,7 +674,7 @@ class MemeTickerManager {
         const dailyChangeElem = document.getElementById('daily-change');
         const holdingsCountElem = document.getElementById('holdings-count');
         
-        const portfolioChange = ((totalValue - totalPrevValue) / totalPrevValue) * 100;
+        const portfolioChange = ((totalValue - prevDayAvg) / prevDayAvg) * 100;
         const changeClass = portfolioChange >= 0 ? 'positive' : 'negative';
 
         totalValueElem.textContent = `$${totalValue.toFixed(2)}`;
