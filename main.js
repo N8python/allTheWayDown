@@ -3,6 +3,20 @@ let modelWorker;
 let isGenerating = false;
 let usernames;
 const generator = new TickerGenerator();
+let settings = {
+    darkMode: false,
+    notifications: false
+};
+
+// Load settings from localStorage
+try {
+    const savedSettings = localStorage.getItem('settings');
+    if (savedSettings) {
+        settings = {...settings, ...JSON.parse(savedSettings)};
+    }
+} catch (e) {
+    console.error('Error loading settings:', e);
+}
 async function initializeSystem() {
     // Load usernames first
     usernames = (await (await fetch('unique_usernames.txt')).text()
@@ -874,6 +888,15 @@ window.addEventListener('load', () => {
     tickerManager = new MemeTickerManager();
     initializeSystem();
     initializeExploreTab();
+    initializeSettings();
+    
+    // Apply initial dark mode state
+    applyDarkMode(settings.darkMode);
+    
+    // Start notification system if enabled
+    if (settings.notifications) {
+        startNotificationSystem();
+    }
 
     // Setup navigation
     document.querySelectorAll('.nav-item').forEach(item => {
@@ -905,6 +928,101 @@ window.addEventListener('load', () => {
     // Set Trade as active by default
     document.querySelector('[data-section="trade"]').classList.add('active');
 });
+
+function initializeSettings() {
+    const darkModeToggle = document.getElementById('dark-mode');
+    const notificationsToggle = document.getElementById('notifications');
+    
+    // Set initial states
+    darkModeToggle.checked = settings.darkMode;
+    notificationsToggle.checked = settings.notifications;
+    
+    // Add event listeners
+    darkModeToggle.addEventListener('change', (e) => {
+        settings.darkMode = e.target.checked;
+        saveSettings();
+        applyDarkMode(e.target.checked);
+    });
+    
+    notificationsToggle.addEventListener('change', (e) => {
+        settings.notifications = e.target.checked;
+        saveSettings();
+        if (e.target.checked) {
+            startNotificationSystem();
+        }
+    });
+}
+
+function saveSettings() {
+    try {
+        localStorage.setItem('settings', JSON.stringify(settings));
+    } catch (e) {
+        console.error('Error saving settings:', e);
+    }
+}
+
+function applyDarkMode(isDark) {
+    const root = document.documentElement;
+    if (isDark) {
+        root.style.setProperty('--background-light', '#15202b');
+        root.style.setProperty('--text-dark', '#ffffff');
+        root.style.setProperty('--text-gray', '#8899a6');
+        root.style.setProperty('--border-color', '#38444d');
+        document.querySelectorAll('.sidebar, .main-content').forEach(el => {
+            el.style.background = '#192734';
+        });
+    } else {
+        root.style.setProperty('--background-light', '#f7f9f9');
+        root.style.setProperty('--text-dark', '#0f1419');
+        root.style.setProperty('--text-gray', '#536471');
+        root.style.setProperty('--border-color', '#ebeef0');
+        document.querySelectorAll('.sidebar, .main-content').forEach(el => {
+            el.style.background = 'white';
+        });
+    }
+}
+
+let notificationInterval;
+function startNotificationSystem() {
+    if (notificationInterval) {
+        clearInterval(notificationInterval);
+    }
+    
+    // Generate a notification every 30-60 seconds
+    notificationInterval = setInterval(() => {
+        if (!settings.notifications) {
+            clearInterval(notificationInterval);
+            return;
+        }
+        
+        // Request permission if needed
+        if (Notification.permission !== "granted") {
+            Notification.requestPermission();
+            return;
+        }
+        
+        // Generate a single tweet
+        modelWorker.postMessage({
+            type: 'generate',
+            data: { count: 1 }
+        });
+    }, 30000 + Math.random() * 30000);
+}
+
+// Modify handleGeneratedTweets to show notifications
+const originalHandleGeneratedTweets = handleGeneratedTweets;
+handleGeneratedTweets = function(data) {
+    originalHandleGeneratedTweets(data);
+    
+    // If this was a notification generation and notifications are enabled
+    if (settings.notifications && data.texts.length === 1 && Notification.permission === "granted") {
+        const tweet = data.texts[0];
+        new Notification("New Memecoin Activity! 🚀", {
+            body: tweet,
+            icon: "/favicon.ico"
+        });
+    }
+};
 
 function initializeExploreTab() {
     const searchInput = document.getElementById('coin-search');
