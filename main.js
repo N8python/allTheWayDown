@@ -366,10 +366,22 @@ class MemeTickerManager {
         // Create trading controls
         const controls = document.createElement('div');
         controls.className = 'trading-controls';
+        // Calculate buy amounts based on portfolio value
+        const portfolioValue = this.portfolio.cash + 
+            Array.from(this.portfolio.holdings.entries())
+                .reduce((sum, [sym, amount]) => {
+                    const ticker = this.tickers.get(sym);
+                    return sum + (ticker ? (ticker.price / 100) * amount : 0);
+                }, 0);
+        
+        const logBase = Math.ceil(Math.log10(Math.max(10, portfolioValue)));
+        const smallBuy = Math.pow(10, logBase - 2);
+        const largeBuy = Math.pow(10, logBase - 1);
+        
         controls.innerHTML = `
             <div class="buy-controls">
-                <button class="buy-btn" data-amount="1">Buy $1</button>
-                <button class="buy-btn" data-amount="10">Buy $10</button>
+                <button class="buy-btn" data-amount="${smallBuy}">Buy $${smallBuy}</button>
+                <button class="buy-btn" data-amount="${largeBuy}">Buy $${largeBuy}</button>
                 <button class="buy-btn" data-amount="100">Buy 100 coins</button>
             </div>
             <div class="sell-controls">
@@ -381,7 +393,8 @@ class MemeTickerManager {
         controls.querySelectorAll('.buy-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const amount = btn.dataset.amount;
-                if (amount === '1' || amount === '10') {
+                // Check if amount is a dollar value (not coin amount)
+                if (!isNaN(amount) && amount !== '100') {
                     // For dollar amounts, calculate coins based on current price (convert price to dollars)
                     const priceInDollars = this.tickers.get(symbol).price / 100;
                     const coins = Math.floor(Number(amount) / priceInDollars);
