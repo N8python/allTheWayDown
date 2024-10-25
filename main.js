@@ -2,6 +2,7 @@ import { TickerGenerator } from './ticker-generator.js';
 let modelWorker;
 let isGenerating = false;
 let usernames;
+let resetting = false;
 const generator = new TickerGenerator();
 let settings = {
     darkMode: false,
@@ -220,12 +221,15 @@ function handleGeneratedTweets(data) {
         }
 
         // Add random hashtags
-        const tweetHashtags = ['#tothemoon', '#bullish', '#memecoin', '#crypto', '#wagmi', '#nfa', '#dyor'];
-        const numHashtags = Math.floor(Math.random() * 2);
-        for (let i = 0; i < numHashtags; i++) {
-            const hashtag = tweetHashtags[Math.floor(Math.random() * tweetHashtags.length)];
-            tweetText += ' ' + hashtag;
+        if (Math.random() < 0.3) {
+            const tweetHashtags = ['#tothemoon', '#bullish', '#memecoin', '#crypto', '#wagmi', '#nfa', '#dyor'];
+            const numHashtags = Math.floor(Math.random() * 2);
+            for (let i = 0; i < numHashtags; i++) {
+                const hashtag = tweetHashtags[Math.floor(Math.random() * tweetHashtags.length)];
+                tweetText += ' ' + hashtag;
+            }
         }
+
 
         const textDiv = document.createElement('div');
         textDiv.className = 'text';
@@ -435,10 +439,16 @@ class MemeTickerManager {
             const logBase = Math.round(Math.log10(portfolioValue));
             const smallBuy = Math.pow(10, logBase - 2);
             const largeBuy = Math.pow(10, logBase - 1);
+            const tickerPrice = this.tickers.get(symbol).price / 100;
+            const amountCanBuy = Math.floor(portfolioValue / tickerPrice);
+            const amountCanBuyLog10 = Math.max(10 ** Math.ceil(Math.log10(amountCanBuy) - 2), 1);
             controls.querySelectorAll('.buy-btn').forEach((btn, i) => {
                 if (i < 2) {
                     btn.textContent = `Buy $${i === 0 ? smallBuy : largeBuy}`;
                     btn.dataset.amount = i === 0 ? smallBuy : largeBuy;
+                } else {
+                    btn.textContent = `Buy ${amountCanBuyLog10} coins`;
+                    btn.dataset.amount = amountCanBuyLog10;
                 }
             });
         }
@@ -767,6 +777,7 @@ class MemeTickerManager {
     }
 
     saveState() {
+        if (resetting) return;
         const state = {
             tickers: Array.from(this.tickers.entries()).map(([symbol, data]) => [
                 symbol,
@@ -871,7 +882,7 @@ class MemeTickerManager {
         const indicator = ticker.state.isDeathSpiral ? '💀' : regimeIndicators[ticker.state.regime];
         tickerElement.textContent = `$${symbol}`;
 
-        priceElement.textContent = `($USD) ${(ticker.price / 100).toFixed(6)}`;
+        priceElement.textContent = `$${(ticker.price / 100).toFixed(6)}`;
         changeElement.textContent = `${percentChange >= 0 ? '▲' : '▼'} ${Math.abs(percentChange).toFixed(2)}%`;
 
         const changeClass = percentChange >= 0 ? 'price-up' : 'price-down';
@@ -885,21 +896,31 @@ class MemeTickerManager {
         // Save state after updates
         this.saveState();
     }
+    update() {
+        for (const [symbol, ticker] of this.tickers) {
+            ticker.element.controls.updateLargeAndSmallBuy();
+            this.updateTicker(symbol);
+        }
+        // Go over the portfolio and remove any holdings w/ zero coins
+        for (const [symbol, amount] of this.portfolio.holdings) {
+            if (amount === 0) {
+                this.portfolio.holdings.delete(symbol);
+            }
+        }
+        // Update explore page if it's visible
+        const exploreSection = document.getElementById('explore-section');
+        if (exploreSection && exploreSection.style.display === 'block') {
+            updateExploreResults(
+                document.getElementById('coin-search').value.toLowerCase(),
+                getCurrentFilter()
+            );
+        }
+    }
 
     startUpdates() {
+        this.update();
         setInterval(() => {
-            for (const [symbol, ticker] of this.tickers) {
-                ticker.element.controls.updateLargeAndSmallBuy();
-                this.updateTicker(symbol);
-            }
-            // Update explore page if it's visible
-            const exploreSection = document.getElementById('explore-section');
-            if (exploreSection && exploreSection.style.display === 'block') {
-                updateExploreResults(
-                    document.getElementById('coin-search').value.toLowerCase(),
-                    getCurrentFilter()
-                );
-            }
+            this.update();
         }, 333);
     }
 
@@ -983,14 +1004,14 @@ class MemeTickerManager {
 }
 let tickerManager;
 // Initialize everything when the page loads
-window.addEventListener('load', async () => {
+window.addEventListener('load', async() => {
     // Hide the main container initially
     document.querySelector('.container').style.visibility = 'hidden';
-    
+
     const tweetsContainer = document.getElementById('tweets-container');
     tweetsContainer.style.height = `${window.innerHeight - 48 - 10}px`;
     tweetsContainer.addEventListener('scroll', handleScroll);
-    
+
     // Initialize everything
     tickerManager = new MemeTickerManager();
     await initializeSystem();
@@ -1034,7 +1055,6 @@ window.addEventListener('load', async () => {
 
     // Set Trade as active by default
     document.querySelector('[data-section="trade"]').classList.add('active');
-
     // Show the container and hide loading screen with a fade effect
     document.querySelector('.container').style.visibility = 'visible';
     const loadingScreen = document.getElementById('loading-screen');
@@ -1084,24 +1104,21 @@ function initializeSettings() {
         );
 
         if (confirmed) {
+            resetting = true; // Set resetting flag
             // Clear all localStorage data
             localStorage.clear();
-            
+
             // Show a brief "Resetting..." message
             const loadingScreen = document.getElementById('loading-screen');
             loadingScreen.style.display = 'flex';
             loadingScreen.style.opacity = '1';
-            
+
             // Add a text message under the turtle
             const message = document.createElement('div');
             message.style.marginTop = '1rem';
             message.textContent = 'Resetting...';
             loadingScreen.appendChild(message);
-            
-            // Reload the page after a brief delay
-            setTimeout(() => {
-                window.location.reload();
-            }, 1000);
+            window.location.reload();
         }
     });
 }
