@@ -1049,6 +1049,7 @@ window.addEventListener('load', async () => {
 function initializeSettings() {
     const darkModeToggle = document.getElementById('dark-mode');
     const notificationsToggle = document.getElementById('notifications');
+    const resetButton = document.getElementById('reset-button');
 
     // Set initial states
     darkModeToggle.checked = settings.darkMode;
@@ -1066,6 +1067,41 @@ function initializeSettings() {
         saveSettings();
         if (e.target.checked) {
             startNotificationSystem();
+        }
+    });
+
+    // Add reset button functionality
+    resetButton.addEventListener('click', () => {
+        // Show confirmation dialog
+        const confirmed = confirm(
+            "Are you sure you want to reset everything?\n\n" +
+            "This will:\n" +
+            "- Delete all your holdings\n" +
+            "- Reset your portfolio\n" +
+            "- Clear your watchlist\n" +
+            "- Reset all settings\n\n" +
+            "This action cannot be undone!"
+        );
+
+        if (confirmed) {
+            // Clear all localStorage data
+            localStorage.clear();
+            
+            // Show a brief "Resetting..." message
+            const loadingScreen = document.getElementById('loading-screen');
+            loadingScreen.style.display = 'flex';
+            loadingScreen.style.opacity = '1';
+            
+            // Add a text message under the turtle
+            const message = document.createElement('div');
+            message.style.marginTop = '1rem';
+            message.textContent = 'Resetting...';
+            loadingScreen.appendChild(message);
+            
+            // Reload the page after a brief delay
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
         }
     });
 }
