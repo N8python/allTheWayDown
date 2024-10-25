@@ -983,12 +983,17 @@ class MemeTickerManager {
 }
 let tickerManager;
 // Initialize everything when the page loads
-window.addEventListener('load', () => {
+window.addEventListener('load', async () => {
+    // Hide the main container initially
+    document.querySelector('.container').style.visibility = 'hidden';
+    
     const tweetsContainer = document.getElementById('tweets-container');
     tweetsContainer.style.height = `${window.innerHeight - 48 - 10}px`;
     tweetsContainer.addEventListener('scroll', handleScroll);
+    
+    // Initialize everything
     tickerManager = new MemeTickerManager();
-    initializeSystem();
+    await initializeSystem();
     initializeExploreTab();
     initializeSettings();
 
@@ -1029,6 +1034,16 @@ window.addEventListener('load', () => {
 
     // Set Trade as active by default
     document.querySelector('[data-section="trade"]').classList.add('active');
+
+    // Show the container and hide loading screen with a fade effect
+    document.querySelector('.container').style.visibility = 'visible';
+    const loadingScreen = document.getElementById('loading-screen');
+    loadingScreen.style.opacity = '1';
+    loadingScreen.style.transition = 'opacity 0.5s ease-out';
+    loadingScreen.style.opacity = '0';
+    setTimeout(() => {
+        loadingScreen.style.display = 'none';
+    }, 500);
 });
 
 function initializeSettings() {
@@ -1065,8 +1080,8 @@ function saveSettings() {
 
 function applyDarkMode(isDark) {
     document.documentElement.style.filter = isDark ? 'invert(1) hue-rotate(180deg)' : 'none';
-    // Don't invert images, videos, trending section and notifications
-    document.querySelectorAll('img, video, .trending, .in-app-notification').forEach(el => {
+    // Don't invert images, videos, trending section, notifications and loading screen
+    document.querySelectorAll('img, video, .trending, .in-app-notification, #loading-screen').forEach(el => {
         el.style.filter = 'invert(1) hue-rotate(180deg)';
     });
 }
