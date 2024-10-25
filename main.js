@@ -280,6 +280,8 @@ class MemeTickerManager {
             }],
             hourlyPrices: new Array(24).fill(100) // Track last 24 hours of prices
         };
+
+        // Initialize model parameters
         // Note that ticker prices are internally stored in *cents* for precision reasons - as otherwise floating point errors can accumulate. when transacting, CONVERT
         this.MODEL_PARAMS = {
             baseVolatility: 0.02,
@@ -338,7 +340,10 @@ class MemeTickerManager {
             maxDeathDuration: 50, // Replace coins that have been in death spiral for this many ticks
             deathSpiralCounter: new Map() // Track how long coins have been in death spiral
         };
-        this.initializeTickers();
+        // Try to load saved state, if it fails, initialize fresh
+        if (!this.loadState()) {
+            this.initializeTickers();
+        }
     }
 
     initializeTickers() {
@@ -646,6 +651,9 @@ class MemeTickerManager {
         }, 1000);
 
         console.log(`Replaced ${symbol} with ${newSymbol}`);
+        
+        // Save state after replacement
+        this.saveState();
     }
 
     executeTrade(symbol, amount, isBuy) {
@@ -755,6 +763,74 @@ class MemeTickerManager {
         holdingsCountElem.textContent = `${this.portfolio.holdings.size} coins`;
     }
 
+    saveState() {
+        const state = {
+            tickers: Array.from(this.tickers.entries()).map(([symbol, data]) => [
+                symbol,
+                {
+                    price: data.price,
+                    prevPrice: data.prevPrice,
+                    history: data.history,
+                    state: data.state,
+                    momentum: data.momentum
+                }
+            ]),
+            historicalTickers: Array.from(this.historicalTickers.entries()),
+            watchlist: Array.from(this.watchlist),
+            portfolio: {
+                cash: this.portfolio.cash,
+                holdings: Array.from(this.portfolio.holdings.entries()),
+                history: this.portfolio.history,
+                hourlyPrices: this.portfolio.hourlyPrices
+            },
+            deathSpiralCounter: Array.from(this.REPLACEMENT_THRESHOLDS.deathSpiralCounter.entries())
+        };
+        
+        try {
+            localStorage.setItem('memeTickerState', JSON.stringify(state));
+        } catch (e) {
+            console.error('Error saving ticker state:', e);
+        }
+    }
+
+    loadState() {
+        try {
+            const savedState = localStorage.getItem('memeTickerState');
+            if (!savedState) return false;
+            
+            const state = JSON.parse(savedState);
+            
+            // Restore tickers
+            this.tickers = new Map(state.tickers.map(([symbol, data]) => [
+                symbol,
+                {
+                    ...data,
+                    element: this.createTickerElement(symbol, data.price, data.history)
+                }
+            ]));
+            
+            // Restore historical tickers
+            this.historicalTickers = new Map(state.historicalTickers);
+            
+            // Restore watchlist
+            this.watchlist = new Set(state.watchlist);
+            
+            // Restore portfolio
+            this.portfolio = {
+                ...state.portfolio,
+                holdings: new Map(state.portfolio.holdings)
+            };
+            
+            // Restore death spiral counter
+            this.REPLACEMENT_THRESHOLDS.deathSpiralCounter = new Map(state.deathSpiralCounter);
+            
+            return true;
+        } catch (e) {
+            console.error('Error loading ticker state:', e);
+            return false;
+        }
+    }
+
     updateTicker(symbol, forceUpdate = false) {
         const ticker = this.tickers.get(symbol);
         if (!ticker || this.checkForReplacement(symbol, ticker)) return;
@@ -802,6 +878,9 @@ class MemeTickerManager {
         // Update chart
         const canvas = ticker.element.querySelector('canvas');
         this.drawChart(canvas, ticker.history, percentChange >= 0);
+        
+        // Save state after updates
+        this.saveState();
     }
 
     startUpdates() {
@@ -1165,6 +1244,9 @@ window.toggleWatchlist = function(symbol) {
     } else {
         tickerManager.watchlist.add(symbol);
     }
+    // Save state after watchlist change
+    tickerManager.saveState();
+    
     updateExploreResults(
         document.getElementById('coin-search').value.toLowerCase(),
         getCurrentFilter()
