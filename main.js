@@ -699,6 +699,9 @@ class MemeTickerManager {
         }
 
         this.updatePortfolioDisplay();
+        
+        // Save state after trade
+        this.saveState();
     }
 
     updatePortfolioDisplay() {
