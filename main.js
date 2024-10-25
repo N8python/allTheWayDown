@@ -344,6 +344,7 @@ class MemeTickerManager {
         if (!this.loadState()) {
             this.initializeTickers();
         }
+        this.startUpdates();
     }
 
     initializeTickers() {
@@ -366,7 +367,6 @@ class MemeTickerManager {
             });
         }
 
-        this.startUpdates();
     }
     createTickerElement(symbol, price, history) {
         const ticker = document.createElement('div');
@@ -651,7 +651,7 @@ class MemeTickerManager {
         }, 1000);
 
         console.log(`Replaced ${symbol} with ${newSymbol}`);
-        
+
         // Save state after replacement
         this.saveState();
     }
@@ -699,7 +699,7 @@ class MemeTickerManager {
         }
 
         this.updatePortfolioDisplay();
-        
+
         // Save state after trade
         this.saveState();
     }
@@ -788,7 +788,7 @@ class MemeTickerManager {
             },
             deathSpiralCounter: Array.from(this.REPLACEMENT_THRESHOLDS.deathSpiralCounter.entries())
         };
-        
+
         try {
             localStorage.setItem('memeTickerState', JSON.stringify(state));
         } catch (e) {
@@ -800,9 +800,9 @@ class MemeTickerManager {
         try {
             const savedState = localStorage.getItem('memeTickerState');
             if (!savedState) return false;
-            
+
             const state = JSON.parse(savedState);
-            
+
             // Restore tickers
             this.tickers = new Map(state.tickers.map(([symbol, data]) => [
                 symbol,
@@ -811,22 +811,22 @@ class MemeTickerManager {
                     element: this.createTickerElement(symbol, data.price, data.history)
                 }
             ]));
-            
+
             // Restore historical tickers
             this.historicalTickers = new Map(state.historicalTickers);
-            
+
             // Restore watchlist
             this.watchlist = new Set(state.watchlist);
-            
+
             // Restore portfolio
             this.portfolio = {
                 ...state.portfolio,
                 holdings: new Map(state.portfolio.holdings)
             };
-            
+
             // Restore death spiral counter
             this.REPLACEMENT_THRESHOLDS.deathSpiralCounter = new Map(state.deathSpiralCounter);
-            
+
             return true;
         } catch (e) {
             console.error('Error loading ticker state:', e);
@@ -881,7 +881,7 @@ class MemeTickerManager {
         // Update chart
         const canvas = ticker.element.querySelector('canvas');
         this.drawChart(canvas, ticker.history, percentChange >= 0);
-        
+
         // Save state after updates
         this.saveState();
     }
