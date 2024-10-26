@@ -18,6 +18,12 @@ async function initializeModel() {
         dtype: "int8",
         device: "wasm",
         kv_cache_dtype: "float16",
+        progress_callback: ({ progress }) => {
+            self.postMessage({
+                type: 'loading',
+                data: { progress }
+            });
+        }
     });
 
     self.postMessage({ type: 'initialized' });

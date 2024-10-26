@@ -51,11 +51,15 @@ function handleWorkerMessage(e) {
                 data: { count: 20, batchSize: 2 }
             });
             break;
-
+        case 'loading':
+            const progress = data.progress;
+            if (Number.isFinite(progress)) {
+                document.getElementById('loading').innerText = `Loading your turtle feed... 🐢 (${progress.toFixed(2)}%)`;
+            }
+            break;
         case 'generation-complete':
             handleGeneratedTweets(data);
             break;
-
         case 'error':
             console.error('Generation error:', error);
             isGenerating = false;
